@@ -1,0 +1,34 @@
+{% extends 'flatpages/default.html' %}
+<meta charset="utf-8" />
+
+<!--{% load cache %}-->
+<!--    {% cache 60 title %}-->
+<!--        {% block title %}-->
+<!--            Subscriptions-->
+<!--        {% endblock title %}-->
+<!--    {% endcache %}-->
+
+
+<!--{% load cache %}-->
+<!--    {% cache 30 content %}-->
+<!--{% block content %}-->
+
+    <h1>Подписки</h1>
+    {% for category in categories %}
+      <p>
+        {{ category.name_cat }}
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="category_id" value="{{category.id}}" />
+            {% if category.user_subscribed %}
+                <button disabled>Подписаться</button>
+                <button name="action" value="unsubscribe">Отписаться</button>
+            {% else %}
+                <button name="action" value="subscribe">Подписаться</button>
+                <button disabled>Отписаться</button>
+            {% endif %}
+        </form>
+      </p>
+    {% endfor %}
+{% endblock content %}
+    {% endcache %}
