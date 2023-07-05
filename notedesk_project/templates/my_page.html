@@ -1,0 +1,93 @@
+<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
+{% extends 'flatpages/default.html' %}
+
+{% load custom_filters %}
+<!-- Подключаем новый файл с нашим тегом -->
+{% load custom_tags %}
+
+<!-- В контенте на странице мы выводим все notes -->
+{% block content %}
+
+<style>
+   button {
+    background: greenyellow; /* Цвет фона */
+    color: darkblue; /* Цвет текста */
+    width: 180px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 10px; /* Уголки */
+   }
+</style>
+
+{# Теперь будем проверять не request.user.is_authenticated, а конкретные права #}
+    {% if user.is_authenticated %}
+        <h1>Мои Объявления</h1>
+        <a href="{% url 'note_create' %}">
+        <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                <button>Добавить объявление</button>
+        </h5>
+        </a>
+
+    <hr>
+
+<!-- Выводим notes, только если они есть с помощью тега if -->
+        {% if mynotes %}
+                {% for note in mynotes %}
+                    {% if note.author == request.user %}
+                        <h4 style="text-align: left;">
+                            <a href="{%url 'note' note.id %}">{{ note.title }}</a>
+        <!--    <span style="text-decoration: none ; color: #808080;">{{ note.title }}</span>-->
+
+
+                        <h6 style="text-align: left;">
+                            <em>{{ note.time_in}}</em>
+                        </h6>
+
+                        <div>
+                            <div class="nav">
+
+                                <a href="{% url 'note_edit' pk=note.id %}">
+                                <h5 style="font-size: 15px; font-family: Times, serif; color: grey";>
+                                    <button>Изменить</button>
+                                </h5>
+                                </a>
+
+                                <a href="{% url 'note_delete' note.id %}">
+                                    <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                                        <button>Удалить</button>
+                                    </h5>
+                                </a>
+
+                            </div>
+                        </div>
+
+                        {% if note.image %}
+                            <img src="{{ note.image.url }}" width="200";>
+                        {% endif %}
+                            <h5 style="text-align: left;">{{ note.note }}
+                            </h5>
+
+                            <hr>
+                    {% endif %}
+                {% endfor %}
+
+
+
+
+        {% else %}
+            <h2>Объявлений нет</h2>
+        {% endif %}
+
+    {% else %}
+        <!--пользователь не авторизован значит на вывод вывод кнопкой на авторизацию-->
+        <div>
+            <h5>Для личной страницы необходимо</h5>
+            <a href="/accounts/login/">
+                <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                    <button>Зарегистрироваться</button></h5>
+            </a>
+        </div>
+
+
+    {% endif %}
+
+{% endblock content %}

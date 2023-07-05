@@ -87,17 +87,27 @@ Notes
                 чтобы ограничить количество символов до 15.
                 Все остальные символы превратятся в многоточие. -->
                 <td style="text-align: left; width:450px">
-                    {{ note.note | truncatechars:25 }}</td>
+                    {{ note.note | truncatechars:35 }}</td>
 
-                <!--<td>
+
                     {# А здесь доступ для каждой ссылки теперь будем проверять отдельно #}
-                    {% if perms.news.change_post %}
-                    <a href="{% url 'note_edit' pk=note.id %}">/Изменить/</a>
+                    {% if note.author == request.user %}
+                        <td>
+                            <a href="{% url 'note_edit' pk=note.id %}">
+                            <h5 style="font-size: 15px; font-family: Times, serif; color: grey";>
+                                <button>Изменить</button>
+                            </h5>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{% url 'note_delete' note.id %}">
+                                <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                                    <button>Удалить</button>
+                                </h5>
+                            </a>
+                        </td>
                     {% endif %}
-                    {% if perms.news.delete_post %}
-                    <a href="{% url 'note_delete' note.id %}">/Удалить/</a>
-                    {% endif %}
-                </td>-->
+
 
 
 <!--                <td>-->
@@ -129,9 +139,8 @@ Notes
             {% endfor %}
         </table> <!-- ... и таблицы -->
 
-<!-- Если товаров нет, говорим, что товаров нет ;) -->
-        <!--<h2>Новостей нет</h2>-->
-        <hr>
+
+
     {% endif %}
 
 {# D4.2 : ad pagination on the page #}

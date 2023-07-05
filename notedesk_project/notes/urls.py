@@ -5,9 +5,9 @@ from django.views.decorators.cache import cache_page  # this is a page to be cac
 # from rest_framework import routers
 
 # Импортируем созданное нами представление
-from .views import NoteCreate, NoteDelete, NoteDetail, NoteSearch, NoteUpdate, NotesList, subscriptions
+from .views import NoteCreate, NoteDelete, NoteDetail, NoteSearch, NoteUpdate, NotesList, subscriptions, NoteReplyList, MyNotesList, MyNoteDetail
 # D8
-from .views import get_note, get_notes, create_note, delete_note, edit_note
+# from .views import get_note, get_notes, create_note, delete_note, edit_note
 
 # router = routers.DefaultRouter()
 # router.register(r'post', PostViewset)
@@ -30,14 +30,17 @@ urlpatterns = [
     path('create/', NoteCreate.as_view(), name='note_create'),
     path('<int:pk>/delete/', NoteDelete.as_view(), name='note_delete'),
     path('<int:pk>/edit/', NoteUpdate.as_view(), name='note_edit'),
+    path('replies/', NoteReplyList.as_view(), name='reply_list'),
     path('subscriptions/', subscriptions, name='subscriptions'),
+    path('my_page/mynote/', MyNoteDetail.as_view(), name='mynote'),
+    path('my_page/', MyNotesList.as_view(), name='my_page')
     # path('index/', IndexView.as_view(), name='index'),
     # D15
-    path('note/<int:pk>/', get_note),
-    path('notes/', get_notes),
-    path('create_note/', create_note),
-    path('delete_note/<int:pk>/', delete_note),
-    path('edit_note/<int:pk>/', edit_note),
+    # path('note/<int:pk>/', get_note),
+    # path('notes/', get_notes),
+    # path('create_note/', create_note),
+    # path('delete_note/<int:pk>/', delete_note),
+    # path('edit_note/<int:pk>/', edit_note),
     # path('api/', include(router.urls), name='api'),
     # path('postru/', PostruView.as_view(), name='postru'),
 ]

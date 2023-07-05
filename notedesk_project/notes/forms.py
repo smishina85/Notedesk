@@ -7,6 +7,7 @@ from django.forms import ModelChoiceField, Textarea
 from .models import Category, Note, NoteReply
 
 
+
 class NoteForm(forms.ModelForm):
     title = forms.CharField(label='Заголовок', min_length=4)
     categ = ModelChoiceField(label='Категория', queryset=Category.objects.all())
@@ -21,9 +22,10 @@ class NoteForm(forms.ModelForm):
             'note',
             'image',
         ]
-        labels = {'note': _('Ваш Текст'), }
+        labels = {'note': _('Ваш Текст'), 'image': _('Картинка')}
         widgets = {'title': Textarea(attrs={'cols': 128, 'rows': 2}), 'note': Textarea(attrs={'cols': 80, 'row': 10}),
                     'categ': Textarea(attrs={'cols': 50}),
+
                    }
 
     def clean(self):
@@ -41,3 +43,28 @@ class NoteForm(forms.ModelForm):
         if title[0].islower():
             raise ValidationError("Заголовок должен начинаться с заглавной буквы")
         return title
+
+class NoteReplyForm(forms.ModelForm):
+    reply = forms.CharField(max_length=512)
+
+    class Meta:
+        model = NoteReply
+        fields = [
+            'reply',
+            # 'note',
+            # 'accept',
+            ]
+        labels = {
+            'reply': _('')
+        }
+        widgets = {
+            # 'note': forms.HiddenInput(),
+            # 'accept': forms.HiddenInput(),
+            'reply': forms.TextInput(),
+        }
+
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     reply = cleaned_data.get("reply")
+    #     return cleaned_data
+

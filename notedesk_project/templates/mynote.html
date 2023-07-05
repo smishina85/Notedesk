@@ -28,19 +28,19 @@
 <!--</h1>-->
 <p>&nbsp;</p>
 <h2 style="text-align: left;">
-    <em>{{ note.author }}</em>
+    <em>{{ mynote.author }}</em>
 </h2>
 
 <h6 style="text-align: left;">
-    <em>{{ note.time_in}}</em>
+    <em>{{ mynote.time_in}}</em>
 </h6>
 
 {# Теперь будем проверять не request.user.is_authenticated, а конкретные права #}
 <div>
         <div class="nav">
         {% if perms.notes.change_note %}
-            {% if note.author == request.user %}
-                    <a href="{% url 'note_edit' pk=note.id %}">
+            {% if mynote.author == request.user %}
+                    <a href="{% url 'note_edit' pk=mynote.id %}">
                     <h5 style="font-size: 15px; font-family: Times, serif; color: grey";>
                         <button>Изменить</button></h5>
                     </a>
@@ -51,7 +51,7 @@
         <div class="nav">
 
         {% if perms.notes.delete_note %}
-                    <a href="{% url 'note_delete' note.id %}">
+                    <a href="{% url 'note_delete' mynote.id %}">
                         <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
                             <button>Удалить</button></h5>
                     </a>
@@ -59,16 +59,16 @@
 
         </div>
 </div>
-    {% if note.image %}
+    {% if mynote.image %}
         <div>
-        <img src="{{ note.image.url }}" width="200" style="horiz-align: left">
+        <img src="{{ mynote.image.url }}" width="200" style="horiz-align: left">
 
         </div>
 
         {% endif %}
     <h5 style="text-align: left;">
 
-    {{ note.note|linebreaks }}
+    {{ mynote.note|linebreaks }}
     <p>
         <!-- Все могут видеть количество откликов на статью, если они есть -->
 
@@ -84,7 +84,7 @@
     {% if user.is_authenticated %}
         <h2> Отклики </h2>
         <!--Отклики на статью может видеть только автор статьи : проверка на владельца статьи  -->
-        {% if request.user == note.author %}
+        {% if request.user == mynote.author %}
             {% if no_of_replies %}
 
                 <hr>
@@ -92,9 +92,9 @@
                 {% for reply in replies %}
                     <div>
                         {% if reply.accept %}
-                        <h4 style="color: green">{{reply.replier}} | {{reply.reply|truncatechars:20}} | Accepted</h4>
+                        <h4 style="color: green">{{reply.replier}} | {{reply.reply|truncatechars:20}} | {{reply.accept}}</h4>
                         {% else %}
-                        <h4 style="color: red">{{reply.replier}} | {{reply.reply|truncatechars:20}} | Not Accepted</h4>
+                        <h4 style="color: red">{{reply.replier}} | {{reply.reply|truncatechars:20}} | {{reply.accept}}</h4>
                         {% endif %}
                     </div>
 
@@ -103,35 +103,35 @@
             <h2> Откликов нет </h2>
             {% endif %}
         <!-- if authorized user is not the author of note then he or she could see own reply if exist or add reply if not-->
-        {% else %}
-            {% for reply in replies %}
+<!--        {% else %}-->
+<!--            {% for reply in replies %}-->
 
-                {% if reply.replier == request.user %}
-                    <div>
-                        {% if reply.accept %}
-                            <h4 style="color: green">{{reply.replier}} | {{reply.reply|truncatechars:20}} | Accepted</h4>
-                        {% else %}
+<!--                {% if reply.replier == request.user %}-->
+<!--                    <div>-->
+<!--                        {% if reply.accept %}-->
+<!--                            <h4 style="color: green">{{reply.replier}} | {{reply.reply|truncatechars:20}} | Accepted</h4>-->
+<!--                        {% else %}-->
 
-                            <h4 style="color: red">{{reply.replier}} | {{reply.reply|truncatechars:20}} | Not Accepted</h4>
-                        {% endif %}
-                    </div>
-                {% endif %}
-            {% endfor %}
+<!--                            <h4 style="color: red">{{reply.replier}} | {{reply.reply|truncatechars:20}} | Not Accepted</h4>-->
+<!--                        {% endif %}-->
+<!--                    </div>-->
+<!--                {% endif %}-->
+<!--            {% endfor %}-->
 
-            <!--And give form for reply creation if there is no any unaccepted replies--->
+<!--            &lt;!&ndash;And give form for reply creation if there is no any unaccepted replies-&ndash;&gt;-->
 
-            <form action="" method="POST" id="id_content" >
-                <div>
-                  <label for="reply_form">Ваш отклик</label>
-                   {{ reply_form.reply }} {% csrf_token %} <input type="submit" value="Разместить">
-                </div>
-            </form>
+<!--            <form action="" method="POST" id="id_content" >-->
+<!--                <div>-->
+<!--                  <label for="reply_form">Ваш отклик</label>-->
+<!--                   {{ reply_form.reply }} {% csrf_token %} <input type="submit" value="Разместить">-->
+<!--                </div>-->
+<!--            </form>-->
 
         {% endif %}
     {% else %}
         <!--пользователь не авторизован значит на вывод вывод кнопкой на авторизацию-->
         <div>
-            <h5>Чтобы сделать отклик на объявление необходимо</h5>
+            <h5>Вам необходимо</h5>
             <a href="/accounts/login/">
                 <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
                     <button>Зарегистрироваться</button></h5>
@@ -142,4 +142,3 @@
     </div>
 
 {% endblock content %}
-

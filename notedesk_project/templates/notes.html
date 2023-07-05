@@ -5,139 +5,114 @@
 <!-- Подключаем новый файл с нашим тегом -->
 {% load custom_tags %}
 
-<!-- Название у нас будет notes -->
-<!--{% load cache %}-->
-<!--    {% cache 60 title %}-->
-<!--        {% block title %}-->
-<!--            Posts-->
-<!--        {% endblock title %}-->
-<!--    {% endcache %}-->
-
 <!-- В контенте на странице мы выводим все notes -->
 {% block content %}
 
 <style>
    button {
-    background: #000000; /* Цвет фона */
-    color: #c0c0c0; /* Цвет текста */
+    background: greenyellow; /* Цвет фона */
+    color: darkblue; /* Цвет текста */
     width: 180px;
-    padding: 10px; /* Поля вокруг текста */
+    padding: 5px; /* Поля вокруг текста */
     border-radius: 10px; /* Уголки */
    }
-  </style>
+</style>
 
     <h1>Объявления</h1>
-    <!--<h2><span style="color:#0000ff">Всего новостей: {{ posts|length }}</span></h2>-->
-    <!-- Используем переданную из представления переменную time_now
-   и применяем к ней фильтр date. По назначению этот фильтр очень похож
-   на метод strftime у объекта datetime в Python — вывод времени
-   в указанном формате. -->
-<!-- Вот так выглядело использование переменной и фильтра -->
-    <h5>{{ time_now|date:'d-m-Y, l' }}</h5>
-   <!-- А вот так мы используем наш тег-->
-
 
 {# Теперь будем проверять не request.user.is_authenticated, а конкретные права #}
-{% if perms.news.add_node %}
-    <a href="{% url 'note_create' %}">
-    <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
-            <button>Добавить note</button>
-    </h5>
-    </a>
-{% endif %}
+    {% if user.is_authenticated %}
+        <a href="{% url 'note_create' %}">
+        <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                <button>Добавить объявление</button>
+        </h5>
+        </a>
+
+     {% else %}
+        <!--пользователь не авторизован значит на вывод вывод кнопкой на авторизацию-->
+        <div>
+            <h5>Для размещения объявления необходимо</h5>
+            <a href="/accounts/login/">
+                <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                    <button>Зарегистрироваться</button></h5>
+            </a>
+        </div>
+
+
+    {% endif %}
 
     <hr>
 
 <!-- Выводим notes, только если они есть с помощью тега if -->
     {% if notes %}
-        <table> <!-- Начинаем описывать таблицу -->
-        <thead>
-            <tr>
-                <td style="text-align: left; width:180px" ><span style="text-decoration:underline;">Дата создания (д-м-г)</span></td>
-                <td style="text-align: left; width:300px"><span style="text-decoration:underline;">Заголовок</span></td>
-                <td style="text-align: left; width:450px"><span style="text-decoration:underline;">Содержание</span></td>
-                {# Условие получается составным. #}
-                {% if perms.notes.change_note or perms.notes.add_note %}
-                <td style="text-align: center; width:100px" ><span style="text-decoration:underline;">Действия</span></td>
-                {% endif %}
-            </tr>
-        </thead>
-
-            <!-- Для каждого товара будете генерироваться новая строчка,
-           т.е. новый HTML код, который указан в теле цикла.
-           При этом сам цикл работает точно так же, как и в Python.
-           product — переменная цикла, т.е. наш товар полученный из списка -->
             {% for note in notes %}
-            <tr>
-                <!-- Не забываем, что переменные в шаблоне ничем не отличаются
-                от переменных в Python. Здесь также можно получать доступ к
-                полям объекта модели. Например, здесь мы выводим имя,
-                в следующем столбце описание, и т.д.  -->
-                <td style="text-align: left; width:200px" >{{ note.time_in|date:'d-m-Y / P'  }}</td>
-                <td style="text-align: left; width:300px">
-                    <a href="{%url 'note' note.id %}">{{ note.title|censor }}</a>
-                </td>
-                <!-- Добавим специальный фильтр truncatechars,
-                чтобы ограничить количество символов до 15.
-                Все остальные символы превратятся в многоточие. -->
-                <td style="text-align: left; width:450px">
-<!--                    <a href="{%url 'note' note.id %}"> -->
-                    {{ note.note | truncatechars:25 }}<!--</a>-->
-                </td>
+                <h4 style="text-align: left;">
+                    <a href="{%url 'note' note.id %}">{{ note.title }}</a>
+<!--    <span style="text-decoration: none ; color: #808080;">{{ note.title }}</span>-->
+                </h4>
+                <h4 style="text-align: left;">
+                    <em>{{ note.author }}</em>
+                </h4>
 
-                <td>
-                    {# А здесь доступ для каждой ссылки теперь будем проверять отдельно #}
-                    {% if perms.notes.change_note %}
-                        {% if note.author == request.user.author %}
-                    <a href="{% url 'note_edit' pk=note.id %}">
-                    <h5 style="font-size: 15px; font-family: Times, serif; color: grey";>
-                        <button>Изменить</button></h5>
-                    </a>
-                        {% endif %}
+                <h6 style="text-align: left;">
+                    <em>{{ note.time_in}}</em>
+                </h6>
+
+{# Теперь будем проверять не request.user.is_authenticated, а авторство #}
+                <div>
+                    <div class="nav">
+
+                    {% if note.author == request.user %}
+                            <a href="{% url 'note_edit' pk=note.id %}">
+                            <h5 style="font-size: 15px; font-family: Times, serif; color: grey";>
+                                <button>Изменить</button>
+                            </h5>
+                            </a>
+
+                            <a href="{% url 'note_delete' note.id %}">
+                                <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                                    <button>Удалить</button>
+                                </h5>
+                            </a>
                     {% endif %}
-                </td>
-                <td>
-                    {% if perms.notes.delete_note %}
-                        {% if note.author == request.user.author %}
-                    <a href="{% url 'note_delete' note.id %}">
-                        <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
-                            <button>Удалить</button></h5>
-                    </a>
-                        {% endif %}
-                    {% endif %}
-                </td>
 
-                <!-- Используем наш фильтр -->
+                    </div>
+                </div>
 
-            </tr>
+                {% if note.image %}
+                    <img src="{{ note.image.url }}" width="200";>
+                {% endif %}
+                    <h5 style="text-align: left;">{{ note.note }}
+                    </h5>
+
+                    <hr>
             {% endfor %}
-        </table> <!-- ... и таблицы -->
     {% else %}
 <!-- Если notes нет, говорим, что товаров нет ;) -->
         <h2>Объявлений нет</h2>
     {% endif %}
 
-<!--{# D4.2 : ad pagination on the page #}-->
+{# D4.2 : ad pagination on the page #}
 
-<!--{# Информация о предыдущих страницах #}-->
-<!--{% if page_obj.has_previous %}-->
-<!--    <a href="?{% url_replace page=1 %}">1</a>-->
-<!--    {% if page_obj.previous_page_number != 1 %}-->
-<!--        ...-->
-<!--        <a href="?{% url_replace page=page_obj.previous_page_number %}">{{ page_obj.previous_page_number }}</a>-->
-<!--    {% endif %}-->
-<!--{% endif %}-->
+{# Информация о предыдущих страницах #}
+    {% if page_obj.has_previous %}
+        <a href="?{% url_replace page=1 %}">1</a>
+        {% if page_obj.previous_page_number != 1 %}
+            ...
+            <a href="?{% url_replace page=page_obj.previous_page_number %}">{{ page_obj.previous_page_number }}</a>
+        {% endif %}
+    {% endif %}
 
-<!--{# Информация о текущей странице #}-->
-<!--{{ page_obj.number }}-->
+{# Информация о текущей странице #}
+    {{ page_obj.number }}
 
-<!--{# Информация о следующих страницах #}-->
-<!--{% if page_obj.has_next %}-->
-<!--    <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>-->
-<!--    {% if paginator.num_pages != page_obj.next_page_number %}-->
-<!--        ...-->
-<!--        <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>-->
-<!--    {% endif %}-->
-<!--{% endif %}-->
+{# Информация о следующих страницах #}
+    {% if page_obj.has_next %}
+        <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>
+        {% if paginator.num_pages != page_obj.next_page_number %}
+            ...
+            <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
+        {% endif %}
+    {% endif %}
 
 {% endblock content %}

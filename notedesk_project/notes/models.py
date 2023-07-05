@@ -106,7 +106,7 @@ class Note(models.Model):
     #         cat_str += 'Категория не назначена'
     #     return cat_str
 
-    @property
+    # @property
     def get_absolute_url(self):
         return reverse('note', args=[str(self.id)])
 
@@ -140,20 +140,15 @@ class NoteReply(models.Model):
     note = models.ForeignKey(Note, on_delete=models.CASCADE)
     replier = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    # def like(self):
-    #     self.comm_rating += 1
-    #     self.save()
-    #
-    # def dislike(self):
-    #     self.comm_rating -= 1
-    #     self.save()
-
     def __str__(self):
-        return f"Date: {self.reply_time_in}, Created by: {self.replier.first_name} {self.replier.last_name}, Отклик: {self.reply}"
+        return f": replier: {self.replier} , reply: {self.reply}, accept: {self.accept}, note: {self.note_id}"
 
     class Meta:
         verbose_name = 'Отклик'
         verbose_name_plural = 'Отклики'
+
+    def get_absolute_url(self):
+        return reverse('reply', args=[str(self.note)])
 
 
 class Subscription(models.Model):

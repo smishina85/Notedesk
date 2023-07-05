@@ -1,0 +1,40 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+
+<style>
+   button {
+    background: lightgrey; /* Цвет фона */
+    color: black; /* Цвет текста */
+    width: 180px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 10px; /* Уголки */
+   }
+  </style>
+
+
+<h1>Удаление объявления</h1>
+<hr>
+<form action="" method="post">
+  {% csrf_token %}
+
+    <p>Удаляем "{{ object.title }}"?</p>
+<!--  <h5 style="font-size: 15px; font-family: Times, serif; color: grey">-->
+<!--            <button>Добавить note</button>-->
+<!--    </h5>-->
+  <button>
+  <input type="submit" value="Удаляем" />
+    </button>
+<!--  <button>-->
+<!--    <a href="http://127.0.0.1:8000/" style="font-size: 15px; font-family: Times, serif; value:"Не удаляем">-->
+<!--    </a>-->
+
+    <a href="{% url 'notes' %}">
+                    <h4 style="font-size: 20px; font-family: Times, serif; color: black">
+                        <button>Не удаляем</button></h4>
+                    </a>
+
+<!--  </button>-->
+
+</form>
+{% endblock content %}

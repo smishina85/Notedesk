@@ -10,7 +10,7 @@ from django.db.models import Exists, OuterRef  # D6.4
 
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin   # D5.6
 from django.core.cache import cache  # импортируем наш кэш
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 # D8.4 Кэширование на низком уровне
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_protect  # D6.4
@@ -30,11 +30,12 @@ from django.shortcuts import redirect
 
 import pytz  #  импортируем стандартный модуль для работы с часовыми поясами
 
-from .filters import NoteFilter
+from .filters import NoteFilter, NoteReplyFilter
 from .models import Category, Subscription   # D6.4
-from .forms import NoteForm
+from .forms import NoteForm, NoteReplyForm
 from .models import Note, NoteReply, User
 from django.contrib.auth.models import User
+
 
 
 from django.views import View  # D7.4
@@ -51,58 +52,6 @@ import json
 import django_filters
 logger = logging.getLogger(__name__)
 
-# class PostViewset(viewsets.ModelViewSet):
-#     queryset = Post.objects.all()
-#     serializer_class = serializers.PostSerializer
-#     # permission_classes = [IsAuthenticated]
-#
-# class AuthorViewset(viewsets.ModelViewSet):
-#     queryset = Author.objects.all()
-#     serializer_class = serializers.AuthorSerializer
-
-
-# class IndexView(View):
-#     def get(self, request):
-#
-#         current_time = timezone.now()
-#
-#         #  Translators: This message appears on the home page only
-#         # string = _('Hello world')
-#
-#         models = Category.objects.all()
-#         # return HttpResponse(string)
-#
-#         context = {
-#             # 'string': string
-#             'models': models,
-#             # 'current_time': timezone.now(),
-#             'current_time': current_time,
-#             'timezones': pytz.common_timezones,
-#             #  добавляем в контекст все доступные часовые пояса
-#         }
-#
-#         return HttpResponse(render(request, 'index.html', context))
-#
-#     #  по пост-запросу будем добавлять в сессию часовой пояс, который и будет обрабатываться написанным нами ранее middleware
-#
-#     def post(self, request):
-#         request.session['django_timezone'] = request.POST['timezone']
-#         # return redirect('/')
-#         return redirect(request.META.get('HTTP_REFERER'))
-
-# class PostruView(View):
-#     def get(self, request):
-#         #  Translators: This message appears on the home page only
-#         # string = _('Hello world')
-#         models = Post.objects.all()
-#         # return HttpResponse(string)
-#
-#         context = {
-#             # 'string': string
-#             'models': models,
-#         }
-#
-#         return HttpResponse(render(request, 'post.html', context))
 
 class NotesList(ListView):
     # Указываем модель, объекты которой мы будем выводить
@@ -115,7 +64,7 @@ class NotesList(ListView):
     # Это имя списка, в котором будут лежать все объекты.
     # Его надо указать, чтобы обратиться к списку объектов в html-шаблоне.
     context_object_name = 'notes'
-    paginate_by = 8
+    paginate_by = 4
 
     # logger.info('INFO')
 
@@ -142,8 +91,55 @@ class NotesList(ListView):
         # В ответе мы должны получить словарь.
         context = super().get_context_data(**kwargs)
         context['filterset'] = self.filterset
+        # print(context['filterset'])
         # К словарю добавим текущую дату в ключ 'time_now'.
         # context['time_now'] = datetime.utcnow()
+        # print(context)
+        return context
+
+
+class MyNotesList(ListView):
+    # Указываем модель, объекты которой мы будем выводить
+    model = Note
+    # Поле, которое будет использоваться для сортировки объектов
+    ordering = '-time_in'
+    # Указываем имя шаблона, в котором будут все инструкции о том,
+    # как именно пользователю должны быть показаны наши объекты
+    template_name = 'my_page.html'
+    # Это имя списка, в котором будут лежать все объекты.
+    # Его надо указать, чтобы обратиться к списку объектов в html-шаблоне.
+    context_object_name = 'mynotes'
+    # paginate_by = 4
+
+    # logger.info('INFO')
+
+    # Переопределяем функцию получения списка notes
+    def get_queryset(self):
+        # Получаем обычный запрос
+        queryset = super().get_queryset()
+        # Используем наш класс фильтрации.
+        # self.request.GET содержит объект QueryDict, который мы рассматривали
+        # в этом юните ранее.
+        # Сохраняем нашу фильтрацию в объекте класса,
+        # чтобы потом добавить в контекст и использовать в шаблоне.
+        self.filterset = NoteFilter(self.request.GET, queryset)
+
+        # Возвращаем из функции отфильтрованный список notes
+        return self.filterset.qs
+
+    # Метод get_context_data позволяет нам изменить набор данных,
+    # который будет передан в шаблон.
+    def get_context_data(self, **kwargs):
+        # С помощью super() мы обращаемся к родительским классам
+        # и вызываем у них метод get_context_data с теми же аргументами,
+        # что и были переданы нам.
+        # В ответе мы должны получить словарь.
+        context = super().get_context_data(**kwargs)
+        context['filterset'] = self.filterset
+        # print(context['filterset'])
+        # К словарю добавим текущую дату в ключ 'time_now'.
+        # context['time_now'] = datetime.utcnow()
+        # print(context)
         return context
 
 
@@ -153,16 +149,58 @@ class NoteDetail(DetailView):
     queryset = Note.objects.all()
     context_object_name = 'note'
 
-    # def get_object(self, *args, **kwargs):  # переопределяем метод получения объекта, как ни странно
-    #     obj = cache.get(f'post-{self.kwargs["pk"]}', None)  # кэш очень похож на словарь, и метод get действует так же.
-    #     # Он забирает значение по ключу, если его нет, то забирает None.
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        connected_replies = NoteReply.objects.filter(note=self.get_object())
+        number_of_replies = connected_replies.count()
+        context['replies'] = connected_replies
+        context['no_of_replies'] = number_of_replies
+        context['reply_form'] = NoteReplyForm
+        # print(self.object.id)
+        # print(context['no_of_replies'])
+        # print(context)
+        return context
+
+    def post(self,request, *args, **kwargs):
+        if self.request.method == 'POST':
+            print('---------Reached here')
+            reply_form = NoteReplyForm(self.request.POST)
+            if reply_form.is_valid():
+                content = reply_form.cleaned_data['reply']
+
+            new_reply = NoteReply(reply=content, replier = self.request.user, note=self.get_object())
+            new_reply.save()
+            return redirect(self.request.path_info)
+
+
+class MyNoteDetail(DetailView):
+    model = Note
+    template_name = 'mynote.html'
+    queryset = Note.objects.all()
+    context_object_name = 'mynote'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        connected_replies = NoteReply.objects.filter(note=self.get_object())
+        number_of_replies = connected_replies.count()
+        context['replies'] = connected_replies
+        context['no_of_replies'] = number_of_replies
+        print(self.object.id)
+        print(context['no_of_replies'])
+        print(context)
+        return context
+
+    # def post(self, request, *args, **kwargs):
+    #     if self.request.method == 'POST':
+    #         print('---------Reached here')
+    #         reply_form = NoteReplyForm(self.request.POST)
+    #         if reply_form.is_valid():
+    #             content = reply_form.cleaned_data['reply']
     #
-    #     # если объекта нет в кэше, то получаем его и записываем в кэш
-    #     if not obj:
-    #         obj = super().get_object(queryset=self.queryset)
-    #     cache.set(f'post-{self.kwargs["pk"]}', obj)
-    #
-    #     return obj
+    #         new_reply = NoteReply(reply=content, replier=self.request.user, note=self.get_object())
+    #         new_reply.save()
+    #         return redirect(self.request.path_info)
+
 
 
 class NoteSearch(ListView):
@@ -176,9 +214,9 @@ class NoteSearch(ListView):
     # Это имя списка, в котором будут лежать все объекты.
     # Его надо указать, чтобы обратиться к списку объектов в html-шаблоне.
     context_object_name = 'note_search'
-    paginate_by = 4
+    paginate_by = 8
 
-    # Переопределяем функцию получения списка товаров
+    # Переопределяем функцию получения списка note
     def get_queryset(self):
         # Получаем обычный запрос
         queryset = super().get_queryset()
@@ -209,12 +247,25 @@ class NoteSearch(ListView):
         return context
 
 
-class NoteCreate(PermissionRequiredMixin, CreateView):
+class NoteCreate(LoginRequiredMixin, CreateView):
     permission_required = ('notes.add_note',)
     raise_exception = True
     form_class = NoteForm
     model = Note
     template_name = 'note_create.html'
+
+    def image_upload_view(request):
+        """Process images uploaded by users"""
+        if request.method == 'POST':
+            form = NoteForm(request.POST, request.FILES)
+            if form.is_valid():
+                form.save()
+                # Get the current instance object to display in the template
+                img_obj = form.instance
+                return render(request, 'note_create.html', {'form': form, 'img_obj': img_obj})
+        else:
+            form = NoteForm()
+        return render(request, 'note_create.html', {'form': form})
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -222,19 +273,73 @@ class NoteCreate(PermissionRequiredMixin, CreateView):
 
 
 
-class NoteDelete(PermissionRequiredMixin, DeleteView):
+class NoteDelete(LoginRequiredMixin, DeleteView):
     permission_required = ('notes.delete_note')
     model = Note
     template_name = 'note_delete.html'
     success_url = reverse_lazy('notes')
 
 
-class NoteUpdate(PermissionRequiredMixin, UpdateView):
+class NoteUpdate(LoginRequiredMixin, UpdateView):
     permission_required = ('notes.change_note')
     form_class = NoteForm
     model = Note
     template_name = "note_edit.html"
 
+    def image_upload_view(request):
+        """Process images uploaded by users"""
+        if request.method == 'POST':
+            form = NoteForm(request.POST, request.FILES)
+            if form.is_valid():
+                form.save()
+                # Get the current instance object to display in the template
+                img_obj = form.instance
+                return render(request, 'note_create.html', {'form': form, 'img_obj': img_obj})
+        else:
+            form = NoteForm()
+        return render(request, 'note_edit.html', {'form': form})
+
+class NoteReplyDetail(DetailView):
+    model = NoteReply
+    template_name = 'notereply.html'
+    queryset = NoteReply.objects.all()
+    context_object_name = 'notereply'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class NoteReplyList(ListView):
+    model = NoteReply
+    template_name = 'reply_list.html'
+    context_object_name = 'reply_list'
+    queryset = NoteReply.objects.all()
+
+    def get_queryset(self):
+        # Получаем обычный запрос
+        queryset = super().get_queryset()
+        # Используем наш класс фильтрации.
+        # self.request.GET содержит объект QueryDict, который мы рассматривали
+        # в этом юните ранее.
+        # Сохраняем нашу фильтрацию в объекте класса,
+        # чтобы потом добавить в контекст и использовать в шаблоне.
+        self.filterset = NoteReplyFilter(self.request.GET, queryset)
+
+        # Возвращаем из функции отфильтрованный список notes
+        return self.filterset.qs
+
+    def get_context_data(self, **kwargs):
+        # С помощью super() мы обращаемся к родительским классам
+        # и вызываем у них метод get_context_data с теми же аргументами,
+        # что и были переданы нам.
+        # В ответе мы должны получить словарь.
+        context = super().get_context_data(**kwargs)
+        context['acception'] = self.filterset
+        # К словарю добавим текущую дату в ключ 'time_now'.
+        # context['time_now'] = datetime.utcnow()
+        print(context)
+        return context
 
 # D6.4
 
@@ -266,145 +371,4 @@ def subscriptions(request):
         'subscriptions.html',
         {'categories': categories_with_subscriptions},
     )
-# В представлении мы можем принять как GET, так и POST-запросы:
-# GET — будут выполняться, когда пользователь просто открывает страницу подписок;
-# POST — когда пользователь нажмёт кнопку подписки или отписки от категории.
-# Далее по коду мы делаем непростой запрос в базу данных. Мы соберём все категории товаров с сортировкой по алфавиту и
-# добавим специальное поле, которое покажет, подписан сейчас пользователь на данную категорию или нет.
-
-# class IndexView(View):
-#     def get(self, request):
-#         #printer.delay(10)
-#         #printer.apply_async([10], countdown = 5)  # apply_async
-#         printer.apply_async([10], eta = datetime.now() + timedelta(seconds=5))
-#         hello.delay()
-#         return HttpResponse('Hello!')
-
-# Здесь мы использовали класс-представление.
-# В методе get() мы написали действия, которые хотим выполнить при вызове этого
-# представления — выполнить задачу hello (метод delay() обсудим чуть позже) и вернуть только 'Hello!' в браузер.
-# Запустите Django и перейдите на страницу http://127.0.0.1/.
-
-def get_note(_, pk):
-    note = Note.objects.get(pk=pk)
-    return HttpResponse(content=note, status=200)
-
-def get_notes(_):
-    notes = Note.objects.all()
-    return HttpResponse(content=notes, status=200)
-
-@csrf_exempt
-def create_note(request):
-    # permission_classes = [permissions.NotAuthenticated]
-    body = json.loads(request.body.decode('utf-8'))
-    note = Note.objects.create(
-        title=body['title'],
-        # charact=body['charact'],
-        note=body['text'],
-    )
-    note.author = 1
-    return HttpResponse(content=note, status=201)
-
-
-def delete_note(_, pk):
-    Note.objects.get(pk=pk).delete()
-    return HttpResponse(status=204)
-
-def edit_note(request, pk):
-    body = json.loads(request.body.decode('utf-8'))
-    note = Note.objects.get(pk=pk)
-    for attr, value in body.items():
-        setattr(note, attr, value)
-    note.save()
-    data = {"title":note.title, "note": note.note}
-    return HttpResponse(content=data, status=200)
-
-
-
-#     # def list(self, request, format=None):
-#     #     return Response([])
-#
-#     # def destroy(self, request, pk, format=None):
-#     #     instance = self.get_object()
-#     #     instance.is_active = False
-#     #     instance.save()
-#     #     return Response(status=status.HTTP_204_NO_CONTENT)
-#
-#     def schools(request):
-#         if request.method == 'GET':
-#             return HttpResponse(json.dumps([
-#                 {
-#                     "id": school.id,
-#                     "address": school.address,
-#                     "name": school.name
-#                 } for school in School.objects.all()
-#             ]))
-#         if request.method == 'POST':
-#             # Нужно извлечь параметы из тела запроса
-#             json_params = json.loads(request.body)
-#
-#             school = School.objects.create(
-#                 name=json_params['name'],
-#                 address=json_params['address']
-#             )
-#             return HttpResponse(json.dumps({
-#                 "id": school.id,
-#                 "name": school.name,
-#                 "school": school.name
-#             }))
-#
-#     def school_id(request, school_id):
-#         school = School.objects.get(id=school_id)
-#         if request.method == 'GET':
-#             return HttpResponse(json.dumps(
-#                 {
-#                     "id": school.id,
-#                     "address": school.address,
-#                     "name": school.name
-#                 }))
-#         json_params = json.loads(request.body)
-#         if request.method == 'PUT':
-#             school.address = json_params['address']
-#             school.name = json_params['name']
-#             school.save()
-#             return HttpResponse(json.dumps({
-#                 "id": school.id,
-#                 "name": school.name,
-#                 "school": school.name
-#             }))
-#         if request.method == 'PATCH':
-#             school.address = json_params.get('address', school.address)
-#             school.name = json_params.get('name', school.name)
-#             school.save()
-#             return HttpResponse(json.dumps({
-#                 "id": school.id,
-#                 "name": school.name,
-#                 "school": school.name
-#             }))
-#         if request.method == 'DELETE':
-#             school.delete();
-#             return HttpResponse(json.dumps({}))
-#
-# class SClassViewset(viewsets.ModelViewSet):
-#     queryset = SClass.objects.all()
-#     serializer_class = SClassSerializer
-#     permission_classes = []
-#     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-#     filterset_fields = ["grade", "school_id"]
-#
-# class StudentViewset(viewsets.ModelViewSet):
-#     queryset = Student.objects.all()
-#     serializer_class = StudentSerializer
-#     permission_classes = [permissions.IsAuthenticated]
-#
-#     def get_queryset(self):
-#         queryset = Student.objects.all()
-#         school_id = self.request.query_params.get('school_id', None)
-#         sclass_id = self.request.query_params.get('sclass_id', None)
-#         if school_id is not None:
-#             queryset = queryset.filter(sclass__school_id=school_id)
-#         if sclass_id is not None:
-#             queryset = queryset.filter(sclass_id=sclass_id)
-#         return queryset
-#
 
