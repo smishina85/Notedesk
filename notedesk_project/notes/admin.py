@@ -20,6 +20,7 @@ from .models import Category, Note, NoteReply, Subscription
 #     queryset.update(rating=0)
 # nullfy_rating.short_description = 'Nullfy the rating'
 
+
 class NoteAdmin(admin.ModelAdmin):
     list_display = ('time_in', 'author', 'title', 'categ', 'note')
     list_filter = ('time_in', 'author')

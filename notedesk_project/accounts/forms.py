@@ -20,7 +20,7 @@ class CustomSignupForm(SignupForm):
 
     def save(self, request):
         user = super().save(request)
-        common_users = Group.objects.get(name="common users")
+        common_users = Group.objects.get(name="Common users")
         user.groups.add(common_users)
         if user.first_name:
             name = user.first_name
@@ -37,7 +37,7 @@ class CustomSignupForm(SignupForm):
         # print(name)
         html = (
             f'<b>{name}</b>, Вы успешно зарегестрировались на '
-            f'<a href="http://127.0.0.1:8000/about"> сайте</a>!'
+            f'<a href="http://127.0.0.1:8000/"> сайте</a>!'
         )
         msg = EmailMultiAlternatives(
             subject=subject, body=text, from_email=None, to=[user.email]

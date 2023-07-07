@@ -69,7 +69,9 @@
                             <a class="nav-link" href="/subscriptions/">Подписки</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/accounts/login/">Регистрация</a>
+                            {% if not user.is_authenticated %}
+                                <a class="nav-link" href="/accounts/login/">Регистрация</a>
+                            {% endif %}
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/accounts/logout/">Выход</a>

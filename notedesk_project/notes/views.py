@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from pprint import pprint
 
+from django.core.mail import EmailMultiAlternatives
 from django.views.decorators.csrf import csrf_exempt
 
 import logging  # D13.4
@@ -33,7 +34,7 @@ import pytz  #  импортируем стандартный модуль дл�
 from .filters import NoteFilter, NoteReplyFilter
 from .models import Category, Subscription   # D6.4
 from .forms import NoteForm, NoteReplyForm
-from .models import Note, NoteReply, User
+from .models import Note, NoteReply
 from django.contrib.auth.models import User
 
 
@@ -170,6 +171,30 @@ class NoteDetail(DetailView):
 
             new_reply = NoteReply(reply=content, replier = self.request.user, note=self.get_object())
             new_reply.save()
+            # We should send email to the author of note about reply
+
+            pub_date = new_reply.reply_time_in  # date of reply
+            text_var = new_reply.reply  # text of reply
+            note = new_reply.note
+            subject = f'There is a reply on your note: {note.title}'
+            print(pub_date)
+            print(text_var)
+            print(note.author_id)
+            print(subject)
+            note_author_id = note.author_id
+            emails = list(User.objects.filter(pk=note_author_id).values_list('email', flat=True))
+            print(emails)
+            email = emails[0]
+            # print(towhom.email)
+            print(email)
+
+            msg_text = (f'{pub_date}  |  {text_var}  |   Ссылка на post: http://127.0.0.1:8000{note.get_absolute_url()}\n')
+            msg_html = (
+                f'{pub_date}  |  {text_var}  |  <br><a href="http://127.0.0.1:8000{note.get_absolute_url()}"></a>\n')
+            msg = EmailMultiAlternatives(subject, msg_text, None, [email])
+            msg.attach_alternative(msg_html, "text/html")
+            msg.send()
+
             return redirect(self.request.path_info)
 
 

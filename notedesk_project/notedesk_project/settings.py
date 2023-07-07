@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'fpages',
     'notes',
     'accounts',
+    'django_apscheduler',
     'django_filters',
 ]
 
@@ -160,8 +161,8 @@ ACCOUNT_EMAIL_CONFIRMATION_REQUIRED = True
 
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none'
-# ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+# ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_FORMS = {"signup": "accounts.forms.CustomSignupForm"}
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 # позволит избежать дополнительного входа и активирует аккаунт сразу, как только мы перейдём по ссылке
@@ -171,9 +172,9 @@ ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 4
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# DEFAULT_FROM_EMAIL = '______'
+DEFAULT_FROM_EMAIL = 'snys@mac.com'
 # почтовый адрес отправителя по умолчанию.
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')  # почтовый адрес отправителя по умолчанию.
+# DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')  # почтовый адрес отправителя по умолчанию.
 
 SERVER_EMAIL = 'snys@mac.com'
 ADMINS = (
