@@ -24,10 +24,8 @@ logger = logging.getLogger(__name__)
 def my_job():
     date_wk_ago = datetime.datetime.today() - datetime.timedelta(days=7)
     notes = Note.objects.filter(time_in__gte=date_wk_ago)
-    # need posts with assigned category (if post created from admin panel there couldn't be a category assigned
-    # notes_categorized = notes.filter(post__isnull=False)
 
-    if notes:  # if there is no any post for the last week no actions required
+    if notes:  # if there is no any note for the last week no actions required
         # create a dictionary where key is a name of category and value is a list of emails of subscribers
         categories = list(Category.objects.all())
 
@@ -39,10 +37,8 @@ def my_job():
                 subject = f'Notes published last week in category: {cat_name}'
                 text_content = ''
                 html_content = ''
-                # print(cat_name)
-                # need to have the list of id of last week posts assigned to exact category
+                # need to have the list of id of last week notes assigned to exact category
                 noteid_exact_cat = list(set(notes.filter(categ_id=id_cat).values_list('id', flat=True)))
-                # print(noteid_exact_cat)
 
                 for i in noteid_exact_cat:
                     note = Note.objects.get(pk=i)
@@ -50,20 +46,12 @@ def my_job():
                     pub_date = (note.time_in).date()
                     text_content += (f'{pub_date}  |  {text_var}  |   Ссылка на post: http://127.0.0.1:8000{note.get_absolute_url()}\n')
                     html_content += (f'{pub_date}  |  {text_var}  |  <br><a href="http://127.0.0.1:8000{note.get_absolute_url()}"></a>\n')
-                # print(html_content)
-                # print(emails)
-                # print(text_content)
 
                 for email in emails:
                     msg = EmailMultiAlternatives(subject, text_content, None, [email])
                     msg.attach_alternative(html_content, "text/html")
                     msg.send()
 
-
-# The `close_old_connections` decorator ensures that database connections,
-# that have become unusable or are obsolete, are closed before and after your
-# job has run. You should use it to wrap any jobs that you schedule that access
-# the Django database in any way.
 
 @util.close_old_connections
 def delete_old_job_executions(max_age=604_800):
@@ -88,8 +76,8 @@ class Command(BaseCommand):
 
         scheduler.add_job(
             my_job,
-            trigger=CronTrigger('0 18 * * 4'),  # Every Friday at 18.00
             # trigger=CronTrigger(second="*/30"), # every 10 seconds
+            trigger=CronTrigger(day_of_week="mon", hour="00", minute="00"),
             id="my_job",  # The `id` assigned to each job MUST be unique
             max_instances=1,
             replace_existing=True,

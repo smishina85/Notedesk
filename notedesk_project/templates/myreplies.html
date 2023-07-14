@@ -1,0 +1,119 @@
+<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
+{% extends 'flatpages/default.html' %}
+
+{% load custom_filters %}
+<!-- Подключаем новый файл с нашим тегом -->
+{% load custom_tags %}
+
+<!-- В контенте на странице мы выводим все notes -->
+{% block content %}
+
+<style>
+   button {
+    background: greenyellow; /* Цвет фона */
+    width: 180px;
+    color: darkblue; /* Цвет текста */
+    padding: 10px; /* Поля вокруг текста */
+    border-radius: 10px; /* Уголки */
+   }
+</style>
+
+    <h1>My Replies to other Notes</h1>
+
+    <div>
+            <a href="{% url 'my_page' %}">
+            <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                    <button>All my Notes</button>
+            </h5>
+            </a>
+
+            <a href="{% url 'mynotes_replylist' %}">
+            <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                    <button>My notes replies</button>
+            </h5>
+            </a>
+
+        </div>
+
+    <hr>
+
+    {% if myreplies %}
+        <table> <!-- Начинаем описывать таблицу -->
+            <thead>
+                <tr>
+                    <td style="text-align: left; width:200px" ><span style="text-decoration:underline;">Дата создания</span></td>
+
+                    <td style="text-align: left; width:450px"><span style="text-decoration:underline;">Отклик</span></td>
+                    <td style="text-align: left; width:200px"><span style="text-decoration:underline;">Note author</span></td>
+                    <td style="text-align: left; width:450px"><span style="text-decoration:underline;">The Note Title</span></td>
+                    <td style="text-align: left; width:200px" ><span style="text-decoration:underline;">Status</span></td>
+                    <td style="text-align: center; width:100px" ><span style="text-decoration:underline;">Действия</span></td>
+                </tr>
+            </thead>
+        {% for reply in myreplies %}
+            <tr>
+                <td style="text-align: left; width:200px" >{{ reply.reply_time_in|date:'d-m-Y'  }}</td>
+                <td style="text-align: left; width:450px">{{ reply.reply }}</td>
+                <td style="text-align: left; width:200px">{{ reply.note.author}}</td>
+
+                <td style="text-align: left; width:450px">{{ reply.note.title }}</td>
+
+                <td>
+
+                    {% if reply.accept %}
+                        <h5 style="text-align: left; width:200px">Accepted</h5>
+                    {% else %}
+                        <h5 style="text-align: left; width:200px; color: red">Not Accepted</h5>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if not reply.accept %}
+                    <a href="{% url 'reply_delete' reply.id %}">
+                        <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                            <button>Delete</button></h5>
+                    </a>
+
+                    {% endif %}
+
+                </td>
+<!--                <td>-->
+
+<!--                    <a href="{% url 'reply_delete' reply.id %}">-->
+<!--                        <h5 style="font-size: 15px; font-family: Times, serif; color: grey">-->
+<!--                            <button>Удалить</button></h5>-->
+<!--                    </a>-->
+
+<!--                </td>-->
+
+                <!-- Используем наш фильтр -->
+
+            </tr>
+
+        {% endfor %}
+        </table> <!-- ... и таблицы -->
+    {% else %}
+        <h2>Откликов нет</h2>
+    {% endif %}
+
+    {# Информация о предыдущих страницах #}
+    {% if page_obj.has_previous %}
+        <a href="?{% url_replace page=1 %}">1</a>
+        {% if page_obj.previous_page_number != 1 %}
+            ...
+            <a href="?{% url_replace page=page_obj.previous_page_number %}">{{ page_obj.previous_page_number }}</a>
+        {% endif %}
+    {% endif %}
+
+    {# Информация о текущей странице #}
+    {{ page_obj.number }}
+
+    {# Информация о следующих страницах #}
+    {% if page_obj.has_next %}
+        <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>
+        {% if paginator.num_pages != page_obj.next_page_number %}
+            ...
+            <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
+        {% endif %}
+    {% endif %}
+
+{% endblock content %}

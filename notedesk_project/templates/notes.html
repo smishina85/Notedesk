@@ -20,6 +20,20 @@
 
     <h1>Объявления</h1>
 
+{# Добавляем форму, которая объединяет набор полей, которые будут отправляться в запросе #}
+    <form action="" method="get">
+        {# Переменная, которую мы передали через контекст, может сгенерировать нам форму с полями #}
+        {{ filterset.form.as_p }}
+        {# Добавим кнопку отправки данных формы #}
+        <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+        <input type="submit" value="Select"/>
+        </h5>
+
+
+    </form>
+
+
+
 {# Теперь будем проверять не request.user.is_authenticated, а конкретные права #}
     {% if user.is_authenticated %}
         <a href="{% url 'note_create' %}">

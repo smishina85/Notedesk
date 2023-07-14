@@ -15,8 +15,6 @@ class NoteForm(forms.ModelForm):
     class Meta:
         model = Note
         fields = [
-            # 'author',
-            # 'charact',
             'title',
             'categ',
             'note',
@@ -44,6 +42,7 @@ class NoteForm(forms.ModelForm):
             raise ValidationError("Заголовок должен начинаться с заглавной буквы")
         return title
 
+
 class NoteReplyForm(forms.ModelForm):
     reply = forms.CharField(max_length=512)
 
@@ -51,15 +50,11 @@ class NoteReplyForm(forms.ModelForm):
         model = NoteReply
         fields = [
             'reply',
-            # 'note',
-            # 'accept',
             ]
         labels = {
             'reply': _('')
         }
         widgets = {
-            # 'note': forms.HiddenInput(),
-            # 'accept': forms.HiddenInput(),
             'reply': forms.TextInput(),
         }
 
@@ -68,3 +63,17 @@ class NoteReplyForm(forms.ModelForm):
     #     reply = cleaned_data.get("reply")
     #     return cleaned_data
 
+class ReplyAcceptForm(forms.ModelForm):
+    accept = forms.BooleanField()
+
+    class Meta:
+        model = NoteReply
+        fields = [
+            'accept',
+            ]
+        labels = {
+            'accept': _('')
+        }
+        widgets = {
+            'accept': forms.TextInput(),
+        }

@@ -1,19 +1,23 @@
 {% extends 'flatpages/default.html' %}
 <meta charset="utf-8" />
 
-<!--{% load cache %}-->
-<!--    {% cache 60 title %}-->
-<!--        {% block title %}-->
-<!--            Subscriptions-->
-<!--        {% endblock title %}-->
-<!--    {% endcache %}-->
+{% block content %}
 
-
-<!--{% load cache %}-->
-<!--    {% cache 30 content %}-->
-<!--{% block content %}-->
 
     <h1>Подписки</h1>
+
+
+<br>
+    <div>
+        <a href="{% url 'notes' %}">
+                <h5 style="font-size: 15px; font-family: Times, serif; color: darkblue; align-self: center; background: greenyellow; width: 100px; padding: 5px; border-radius: 10px">
+                        <button>All Notes</button>
+                </h5>
+        </a>
+    </div>
+
+<hr>
+
     {% for category in categories %}
       <p>
         {{ category.name_cat }}
@@ -31,4 +35,3 @@
       </p>
     {% endfor %}
 {% endblock content %}
-<!--    {% endcache %}-->

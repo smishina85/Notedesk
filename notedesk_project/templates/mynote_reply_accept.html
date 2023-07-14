@@ -1,0 +1,43 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+<h1>My Note Reply Acception</h1>
+<hr>
+
+
+    <h2>My Note :
+       {{object.note.title}}
+    </h2>
+<hr>
+
+
+
+
+<h2>{{reply_accept.reply}}</h2>
+<!--<form method="post" enctype="multipart/form-data">-->
+<!--    {% csrf_token %}-->
+<!--    {{ form.as_p }}-->
+<!--&lt;!&ndash;    <input type="submit" value="Save" />&ndash;&gt;-->
+<!--    <button type="submit">Confirm</button>-->
+<!--</form>-->
+
+<form action="" method="post">
+  {% csrf_token %}
+    {{ form.as_p }}
+
+    <p>Accept?  "{{ object.reply }}"?</p>
+<!--  <h5 style="font-size: 15px; font-family: Times, serif; color: grey">-->
+<!--            <button>Добавить note</button>-->
+<!--    </h5>-->
+  <button>
+  <input type="submit" value="Accept" />
+    </button>
+</form>
+        <a href="{% url 'mynotes_replylist' %}">
+                    <h4 style="font-size: 20px; font-family: Times, serif; color: black">
+                        <button>Reject</button></h4>
+                    </a>
+
+
+
+{% endblock content %}

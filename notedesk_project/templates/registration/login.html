@@ -11,10 +11,10 @@
 
 {% if request.user.is_authenticated %}
 
-    <a href="{% url='account_logoff' %}">
+<a href="{% url='account_logoff' %}"></a>
 {% else %}
 
-        <a href="{% url='account_login' %}">
-{% endif %}-->
+<a href="{% url='account_login' %}"></a>
+{% endif %}
 
 {% endblock %}

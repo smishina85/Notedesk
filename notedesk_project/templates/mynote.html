@@ -12,13 +12,34 @@
 
 <style>
    button {
-    background: #007E3E; /* Цвет фона */
+    background: greenyellow; /* Цвет фона */
     width: 180px;
-    color: #fff; /* Цвет текста */
+    color: darkblue; /* Цвет текста */
     padding: 10px; /* Поля вокруг текста */
     border-radius: 10px; /* Уголки */
    }
 </style>
+
+<div>
+            <a href="{% url 'my_page' %}">
+            <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                    <button>All my Notes</button>
+            </h5>
+            </a>
+
+            <a href="{% url 'mynotes_replylist' %}">
+            <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                    <button>My notes replies</button>
+            </h5>
+            </a>
+
+            <a href="{% url 'myreplies' %}">
+            <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                    <button>My replies on other notes</button>
+            </h5>
+            </a>
+
+        </div>
 
 <hr>
 
@@ -26,10 +47,9 @@
 <!--<h1 style="text-align: left;">-->
 <!--    <span style="text-decoration: none ; color: #808080;">{{ note.title|censor }}</span>-->
 <!--</h1>-->
-<p>&nbsp;</p>
-<h2 style="text-align: left;">
-    <em>{{ mynote.author }}</em>
-</h2>
+<h4 style="text-align: left;">
+    <em>{{ mynote.title}}</em>
+</h4>
 
 <h6 style="text-align: left;">
     <em>{{ mynote.time_in}}</em>
@@ -90,13 +110,23 @@
                 <hr>
                 <!-- present the list of replies -->
                 {% for reply in replies %}
+
                     <div>
                         {% if reply.accept %}
-                        <h4 style="color: green">{{reply.replier}} | {{reply.reply|truncatechars:20}} | {{reply.accept}}</h4>
+                            <h4 style="color: green">{{reply.replier}} | {{reply.reply|truncatechars:64}} | Accepted</h4>
                         {% else %}
-                        <h4 style="color: red">{{reply.replier}} | {{reply.reply|truncatechars:20}} | {{reply.accept}}</h4>
+
+                            <a href="{% url 'mynotes_replylist' %}"><h4 style="color: red">{{reply.replier}} | {{reply.reply|truncatechars:64}} | Not Accepted</h4></a>
                         {% endif %}
                     </div>
+
+<!--                    <div>-->
+<!--                        {% if reply.accept %}-->
+<!--                        <h4 style="color: green">{{reply.replier}} | {{reply.reply|truncatechars:20}} | {{reply.accept}}</h4>-->
+<!--                        {% else %}-->
+<!--                        <h4 style="color: red">{{reply.replier}} | {{reply.reply|truncatechars:20}} | {{reply.accept}}</h4>-->
+<!--                        {% endif %}-->
+<!--                    </div>-->
 
                 {% endfor %}
             {% else %}

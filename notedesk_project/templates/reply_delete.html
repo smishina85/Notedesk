@@ -13,12 +13,12 @@
   </style>
 
 
-<h1>Удаление объявления</h1>
+<h1>Удаление отклика</h1>
 <hr>
 <form action="" method="post">
   {% csrf_token %}
 
-    <p>Удаляем "{{ object.title }}"?</p>
+    <p>Удаляем "{{ object.reply }}"?</p>
 <!--  <h5 style="font-size: 15px; font-family: Times, serif; color: grey">-->
 <!--            <button>Добавить note</button>-->
 <!--    </h5>-->
@@ -34,7 +34,8 @@
 <!--  </button>-->
 
 </form>
-        <a href="{% url 'notes' %}">
+
+<a href="{% url 'myreplies' %}">
                     <h4 style="font-size: 20px; font-family: Times, serif; color: black">
                         <button>Не удаляем</button></h4>
                     </a>

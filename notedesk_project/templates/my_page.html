@@ -18,25 +18,54 @@
    }
 </style>
 
+
+
 {# Теперь будем проверять не request.user.is_authenticated, а конкретные права #}
     {% if user.is_authenticated %}
         <h1>Мои Объявления</h1>
-        <a href="{% url 'note_create' %}">
-        <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
-                <button>Добавить объявление</button>
-        </h5>
-        </a>
+
+            {# Добавляем форму, которая объединяет набор полей, которые будут отправляться в запросе #}
+            <form action="" method="get">
+                {# Переменная, которую мы передали через контекст, может сгенерировать нам форму с полями #}
+                {{ filterset.form.as_p }}
+                {# Добавим кнопку отправки данных формы #}
+                <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                <input type="submit" value="Select"/>
+                </h5>
+
+
+            </form>
+        <div>
+            <a href="{% url 'note_create' %}">
+            <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                    <button>Добавить объявление</button>
+            </h5>
+            </a>
+
+            <a href="{% url 'mynotes_replylist' %}">
+            <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                    <button>My notes replies</button>
+            </h5>
+            </a>
+
+            <a href="{% url 'myreplies' %}">
+            <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                    <button>My replies on other notes</button>
+            </h5>
+            </a>
+
+        </div>
 
     <hr>
 
 <!-- Выводим notes, только если они есть с помощью тега if -->
         {% if mynotes %}
                 {% for note in mynotes %}
-                    {% if note.author == request.user %}
+<!--                    {% if note.author == request.user %}-->
                         <h4 style="text-align: left;">
-                            <a href="{%url 'note' note.id %}">{{ note.title }}</a>
+                            <a href="{%url 'mynote' note.id %}">{{ note.title }}</a>
         <!--    <span style="text-decoration: none ; color: #808080;">{{ note.title }}</span>-->
-
+                        </h4>
 
                         <h6 style="text-align: left;">
                             <em>{{ note.time_in}}</em>
@@ -67,7 +96,7 @@
                             </h5>
 
                             <hr>
-                    {% endif %}
+<!--                    {% endif %}-->
                 {% endfor %}
 
 
@@ -76,6 +105,29 @@
         {% else %}
             <h2>Объявлений нет</h2>
         {% endif %}
+
+        {# D4.2 : ad pagination on the page #}
+
+        {# Информация о предыдущих страницах #}
+            {% if page_obj.has_previous %}
+                <a href="?{% url_replace page=1 %}">1</a>
+                {% if page_obj.previous_page_number != 1 %}
+                    ...
+                    <a href="?{% url_replace page=page_obj.previous_page_number %}">{{ page_obj.previous_page_number }}</a>
+                {% endif %}
+            {% endif %}
+
+        {# Информация о текущей странице #}
+            {{ page_obj.number }}
+
+        {# Информация о следующих страницах #}
+            {% if page_obj.has_next %}
+                <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>
+                {% if paginator.num_pages != page_obj.next_page_number %}
+                    ...
+                    <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
+                {% endif %}
+            {% endif %}
 
     {% else %}
         <!--пользователь не авторизован значит на вывод вывод кнопкой на авторизацию-->

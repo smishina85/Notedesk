@@ -27,46 +27,16 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarResponsive">
                     <ul class="navbar-nav ml-auto">
-                        <!--<li class="nav-item active">
-                            <a class="nav-link" href="#">Home
-                                <span class="sr-only">(current)</span>
-                            </a>
-                        </li>-->
+
                         <li class="nav-item">
                             <a class="nav-link" href="http://127.0.0.1:8000/">Все Объявления</a>
                         </li>
-<!--                        <li class="nav-item">-->
-<!--                            <a class="nav-link" href="/politics/">Политика</a>-->
-<!--                        </li>-->
-<!--                        <li class="nav-item">-->
-<!--                            <a class="nav-link" href="/business/">Бизнес</a>-->
-<!--                        </li>-->
-<!--                        <li class="nav-item">-->
-<!--                            <a class="nav-link" href="/technologies/">Технологии</a>-->
-<!--                        </li>-->
-<!--                        <li class="nav-item">-->
-<!--                            <a class="nav-link" href="/culture/">Культура</a>-->
-<!--                        </li>-->
-<!--                        <li class="nav-item">-->
-<!--                            <a class="nav-link" href="/health/">Здоровье</a>-->
-<!--                        </li>-->
-<!--                        <li class="nav-item">-->
-<!--                            <a class="nav-link" href="/sport/">Спорт</a>-->
-<!--                        </li>-->
-<!--                        &lt;!&ndash;<li class="nav-item">-->
-<!--                            <a class="nav-link" href="/forauthors/">Для Авторов</a>-->
-<!--                        </li> &ndash;&gt;-->
-<!--                        <li class="nav-item">-->
-<!--                            <a class="nav-link" href="/search/">Поиск</a>-->
-<!--                        </li>-->
-<!--                        &lt;!&ndash;<li class="nav-item">-->
-<!--                            <a class="nav-link" href="/allnews/create/">Создание поста</a>-->
-<!--                        </li>-->
-<!--                        <li class="nav-item">-->
-<!--                            <a class="nav-link" href="/accounts/login/">LOGIN</a>-->
-<!--                        </li>-->
+
                         <li class="nav-item">
                             <a class="nav-link" href="/subscriptions/">Подписки</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/search/">Поиск</a>
                         </li>
                         <li class="nav-item">
                             {% if not user.is_authenticated %}
@@ -74,11 +44,11 @@
                             {% endif %}
                         </li>
                         <li class="nav-item">
+                            {% if user.is_authenticated %}
                             <a class="nav-link" href="/accounts/logout/">Выход</a>
+                            {% endif %}
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/search/">Поиск</a>
-                        </li>
+
                         <li class="nav-item"; float: right>
                             {% if user.is_authenticated %}
                             <a class="nav-link" href="/my_page/">Личный кабинет, {{ request.user }}</a>

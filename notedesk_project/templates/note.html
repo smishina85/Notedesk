@@ -12,21 +12,24 @@
 
 <style>
    button {
-    background: #007E3E; /* Цвет фона */
+    background: greenyellow; /* Цвет фона */
+    color: darkblue; /* Цвет текста */
     width: 180px;
-    color: #fff; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
+    padding: 5px; /* Поля вокруг текста */
     border-radius: 10px; /* Уголки */
    }
 </style>
+<br>
+    <div>
+        <a href="{% url 'notes' %}">
+                <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
+                        <button>All Notes</button>
+                </h5>
+        </a>
+    </div>
 
 <hr>
 
-<p>&nbsp;</p>
-<!--<h1 style="text-align: left;">-->
-<!--    <span style="text-decoration: none ; color: #808080;">{{ note.title|censor }}</span>-->
-<!--</h1>-->
-<p>&nbsp;</p>
 <h2 style="text-align: left;">
     <em>{{ note.author }}</em>
 </h2>
@@ -51,10 +54,12 @@
         <div class="nav">
 
         {% if perms.notes.delete_note %}
+            {% if note.author == request.user %}
                     <a href="{% url 'note_delete' note.id %}">
                         <h5 style="font-size: 15px; font-family: Times, serif; color: grey">
                             <button>Удалить</button></h5>
                     </a>
+            {% endif %}
         {% endif %}
 
         </div>
@@ -92,9 +97,9 @@
                 {% for reply in replies %}
                     <div>
                         {% if reply.accept %}
-                        <h4 style="color: green">{{reply.replier}} | {{reply.reply|truncatechars:20}} | Accepted</h4>
+                        <h4 style="color: green">{{reply.replier}} | {{reply.reply|truncatechars:64}} | Accepted</h4>
                         {% else %}
-                        <h4 style="color: red">{{reply.replier}} | {{reply.reply|truncatechars:20}} | Not Accepted</h4>
+                        <h4 style="color: red">{{reply.replier}} | {{reply.reply|truncatechars:64}} | Not Accepted</h4>
                         {% endif %}
                     </div>
 
@@ -109,10 +114,9 @@
                 {% if reply.replier == request.user %}
                     <div>
                         {% if reply.accept %}
-                            <h4 style="color: green">{{reply.replier}} | {{reply.reply|truncatechars:20}} | Accepted</h4>
+                            <h4 style="color: green">{{reply.replier}} | {{reply.reply|truncatechars:64}} | Accepted</h4>
                         {% else %}
-
-                            <h4 style="color: red">{{reply.replier}} | {{reply.reply|truncatechars:20}} | Not Accepted</h4>
+                            <h4 style="color: red">{{reply.replier}} | {{reply.reply|truncatechars:64}} | Not Accepted</h4>
                         {% endif %}
                     </div>
                 {% endif %}
@@ -120,12 +124,24 @@
 
             <!--And give form for reply creation if there is no any unaccepted replies--->
 
-            <form action="" method="POST" id="id_content" >
-                <div>
-                  <label for="reply_form">Ваш отклик</label>
-                   {{ reply_form.reply }} {% csrf_token %} <input type="submit" value="Разместить">
-                </div>
-            </form>
+            {% if not no_of_replies %}
+                <form action="" method="POST" id="id_content" >
+                    <div>
+                      <label for="reply_form">Ваш отклик</label>
+                       {{ reply_form.reply }} {% csrf_token %} <input type="submit" value="Разместить">
+                    </div>
+                </form>
+            {% else %}
+
+                {% if not showreplyform %}
+                    <form action="" method="POST" id="id_content" >
+                        <div>
+                          <label for="reply_form">Ваш отклик</label>
+                           {{ reply_form.reply }} {% csrf_token %} <input type="submit" value="Разместить">
+                        </div>
+                    </form>
+                {% endif %}
+            {% endif %}
 
         {% endif %}
     {% else %}

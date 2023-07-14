@@ -21,8 +21,50 @@ class NoteFilter(FilterSet):
         # будет производиться фильтрация.
         fields = {
                 'author': ['exact'],
+                'title': ['icontains'],
+                'note': ['icontains'],
+                'categ': ['exact'],
+            }
+
+    date = django_filters.DateTimeFilter(
+        field_name='time_in',
+        lookup_expr='gt',
+        label='Дата',
+        widget=DateInput(attrs={'type': 'date'},
+                         )
+    )
+
+class NoteCatFilter(FilterSet):
+
+    class Meta:
+
+        # В Meta классе мы должны указать Django модель,
+        # в которой будем фильтровать записи.
+        model = Note
+        # В fields мы описываем по каким полям модели
+        # будет производиться фильтрация.
+        fields = {
+                # 'author': ['exact'],
                 # 'title': ['icontains'],
                 # 'note': ['exact'],
+                'categ': ['exact'],
+            }
+
+
+class MyNoteFilter(FilterSet):
+
+    class Meta:
+
+        # В Meta классе мы должны указать Django модель,
+        # в которой будем фильтровать записи.
+        model = Note
+        # В fields мы описываем по каким полям модели
+        # будет производиться фильтрация.
+        fields = {
+                # 'author': ['exact'],
+                'title': ['icontains'],
+                # 'note': ['exact'],
+                'categ': ['exact'],
             }
 
     date = django_filters.DateTimeFilter(
@@ -42,6 +84,20 @@ class NoteReplyFilter(FilterSet):
         # В fields мы описываем по каким полям модели
         # будет производиться фильтрация.
         fields = {
+                'accept': ['exact'],
+            }
+
+class ReplyFilter(FilterSet):
+    class Meta:
+
+        # В Meta классе мы должны указать Django модель,
+        # в которой будем фильтровать записи.
+        model = NoteReply
+        # В fields мы описываем по каким полям модели
+        # будет производиться фильтрация.
+        fields = {
+                'reply': ['icontains'],
+                'note': ['exact'],
                 'accept': ['exact'],
             }
 
