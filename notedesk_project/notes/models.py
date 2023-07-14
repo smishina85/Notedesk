@@ -24,7 +24,6 @@ class Note(models.Model):
     title = models.CharField("Заголовок", max_length=128)
     note = models.TextField("Ваше объявление")
     image = models.ImageField(upload_to='images/', blank=True)
-    # note = RichTextUploadingField()
     categ = models.ForeignKey(Category, on_delete=models.CASCADE, null=False, verbose_name="Категория")
 
 
@@ -48,7 +47,6 @@ class NoteReply(models.Model):
     reply = models.TextField('Ваш отклик')
     reply_time_in = models.DateTimeField(auto_now_add=True)
     accept = models.BooleanField(default=False)  # acception of the reply
-    # comm_rating = models.IntegerField(default=0)
     note = models.ForeignKey(Note, on_delete=models.CASCADE)
     replier = models.ForeignKey(User, on_delete=models.CASCADE)
 
